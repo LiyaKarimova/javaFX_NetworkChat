@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TextField?>
@@ -24,6 +25,16 @@
    <center>
       <VBox fx:id="vBox" prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
          <children>
+            <HBox prefHeight="54.0" prefWidth="433.0">
+               <children>
+                  <TextField fx:id="newNick" prefHeight="26.0" prefWidth="381.0" />
+                  <Button fx:id="changeNick" mnemonicParsing="false" onAction="#onChangeNickButtonClick" prefHeight="26.0" prefWidth="185.0" text="Change nick">
+                     <HBox.margin>
+                        <Insets left="50.0" />
+                     </HBox.margin>
+                  </Button>
+               </children>
+            </HBox>
             <ListView fx:id="dialog" prefHeight="200.0" prefWidth="200.0" />
          </children></VBox>
    </center>
@@ -40,11 +51,12 @@
                   <Insets left="15.0" />
                </HBox.margin>
             </TextField>
-            <Button fx:id="init" mnemonicParsing="false" onAction="#onInitButtonClick" onMouseClicked="#onInitButtonClick" prefHeight="26.0" prefWidth="91.0" text="Auth">
+            <Button fx:id="init" mnemonicParsing="false" onAction="#onInitButtonClick" onMouseClicked="#onInitButtonClick" prefHeight="26.0" prefWidth="57.0" text="Auth">
                <HBox.margin>
                   <Insets left="50.0" />
                </HBox.margin>
             </Button>
+            <Accordion />
          </children>
       </HBox>
    </top>

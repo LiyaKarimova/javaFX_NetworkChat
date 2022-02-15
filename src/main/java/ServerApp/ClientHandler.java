@@ -5,8 +5,10 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.sql.SQLException;
 
 public class ClientHandler {
+
     private MyServer myServer;
     private Socket socket;
     private DataInputStream in;
@@ -18,6 +20,10 @@ public class ClientHandler {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public ClientHandler(MyServer myServer, Socket socket) {
         try {
             this.myServer = myServer;
@@ -25,16 +31,20 @@ public class ClientHandler {
             this.in = new DataInputStream(socket.getInputStream());
             this.out = new DataOutputStream(socket.getOutputStream());
             this.name = "";
-            socket.setSoTimeout(10000);
+            socket.setSoTimeout(1000000);
             new Thread(() -> {
                 try {
-                    authentication();
+                    try {
+                        authentication();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
                     readMessages();
                 } catch (SocketTimeoutException exception){
                     sendMsg("/timeout");
                     System.out.println("Вылет по таймауту");
                     simpleCloseConnection();
-                } catch (IOException e) {
+                } catch (IOException | SQLException e) {
                     e.printStackTrace();
                 }
                     finally {
@@ -46,7 +56,7 @@ public class ClientHandler {
         }
     }
 
-    public void authentication() throws IOException {
+    public void authentication() throws IOException, SQLException {
         while (true) {
             String str = in.readUTF();
             if (str.startsWith("/auth")) {
@@ -72,7 +82,7 @@ public class ClientHandler {
 
     }
 
-    public void readMessages() throws IOException {
+    public void readMessages() throws IOException, SQLException {
         while (true) {
             String strFromClient = in.readUTF();
             if (strFromClient.startsWith("/w")) {
@@ -80,15 +90,21 @@ public class ClientHandler {
             } else if (strFromClient.equals("/end")) {
                 closeConnection();
                 return;
+            } else if (strFromClient.startsWith("/change")){
+                String oldName = name;
+                name = myServer.getAuthService().changeNick(strFromClient);
+                if (!myServer.isNickBusy(name)) {
+                    myServer.broadcastMsg("Пользователь " + oldName + " сменил ник на " + name);
+                } else {
+                   sendMsg("Такой ник уже используется");
+                }
             } else {
                 System.out.println("Отправляю сообщение всем");
                 System.out.println("от " + name + ": " + strFromClient);
                 myServer.broadcastMsg(name + ": " + strFromClient);
             }
-
         }
     }
-
 
     public void sendMsg(String msg) {
         try {

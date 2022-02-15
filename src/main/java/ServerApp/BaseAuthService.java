@@ -1,22 +1,11 @@
 package ServerApp;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.*;
 
 public class BaseAuthService implements AuthService {
-    private class Entry {
-        private String login;
-        private String pass;
-        private String nick;
+    private static Connection connection;
+    private static Statement stmt;
 
-        public Entry(String login, String pass, String nick) {
-            this.login = login;
-            this.pass = pass;
-            this.nick = nick;
-        }
-    }
-
-    private List<Entry> entries;
 
     @Override
     public void start() {
@@ -29,20 +18,70 @@ public class BaseAuthService implements AuthService {
     }
 
     public BaseAuthService() {
-        entries = new ArrayList<>();
-        entries.add(new Entry("login1", "pass1", "nick1"));
-        entries.add(new Entry("login2", "pass2", "nick2"));
-        entries.add(new Entry("login3", "pass3", "nick3"));
+        try {
+            connect();
+            System.out.println("connect");
+//            String nick = getNickByLoginPass("log1","pass1");
+//            if (nick != null){
+//                log.info(nick);
+//            } else System.err.println("null");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+//        finally {
+//            disconnect();
+//        }
+
+    }
+
+    public static void connect() throws SQLException {
+        connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/users","root","r6Y89dF3");
+        stmt = connection.createStatement();
+    }
+
+    public static void disconnect() {
+        System.out.println("disconnect");
+        try {
+            if (stmt != null) {
+                stmt.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        try {
+            if (connection != null) {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
 
     @Override
-    public String getNickByLoginPass(String login, String pass) {
-        for (Entry o : entries) {
-            if (o.login.equals(login) && o.pass.equals(pass)) return o.nick;
-        }
-        return null;
+    public String getNickByLoginPass (String log, String pas) throws SQLException {
+        String query = "SELECT * FROM users.user WHERE login = '"+log+"' AND pass = '"+pas+"';";
+        ResultSet rs = stmt.executeQuery(query);
+        if(rs.next()){
+            return rs.getString("nick");
+        } else return null;
     }
+
+    @Override
+    public String changeNick(String  msg) throws SQLException {
+        String[] parts = msg.split("\\s");
+        String log = parts [1];
+        String pas = parts [2];
+        String newNick = parts [3];
+        String query = "UPDATE users.user SET nick = 'Liya' WHERE (login = '"+log+"' AND pass = '"+pas+"');";
+        stmt.executeUpdate(query);
+        return newNick;
+        //нужно сделать проверку уникальности ника
+    }
+
+
+
 
 
 }

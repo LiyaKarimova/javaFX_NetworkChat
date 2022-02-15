@@ -28,6 +28,13 @@ public class HelloController {
     @FXML
     private Button init;
 
+    @FXML
+    private TextField newNick;
+
+    @FXML
+    private Button changeNick;
+
+
 
 
     //    @FXML
@@ -35,7 +42,6 @@ public class HelloController {
     @FXML
     private ListView<String> dialog;
     public ObservableList<String> list = FXCollections.observableArrayList();
-
 
     private Client clientService;
 
@@ -50,13 +56,19 @@ public class HelloController {
             e.printStackTrace();
         }
 
-        login.setText("login1");
+        login.setText("log1");
         pass.setText("pass1");
 
     }
 
     public void onInitButtonClick () throws IOException {
         clientService.sendMessage("/auth " + login.getText() + " " + pass.getText());
+        login.clear();
+        pass.clear();
+    }
+
+    public void onChangeNickButtonClick () throws IOException {
+        clientService.sendMessage("/change " + login.getText()+ " " + pass.getText() + " " +newNick.getText());
         login.clear();
         pass.clear();
     }

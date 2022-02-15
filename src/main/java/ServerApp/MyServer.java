@@ -12,14 +12,14 @@ public class MyServer {
     private final int PORT = 8189;
     private List<ClientHandler> clients;
     private AuthService authService;
-    private DataBaseService dataBaseService;
+
 
     public AuthService getAuthService() {
         return authService;
     }
 
-    public DataBaseService getDataBaseService() {
-        return dataBaseService;
+    public List<ClientHandler> getClients() {
+        return clients;
     }
 
     public MyServer() {
@@ -52,6 +52,17 @@ public class MyServer {
         return false;
     }
 
+    public synchronized boolean changeNick (String nick, String newNick) {
+        for (ClientHandler o : clients) {
+            if (o.getName().equals(nick)) {
+                o.setName(newNick);
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     public synchronized void privateMsg (String msg, String name) {
         String[] parts = msg.split("\\s");
         String nick = parts [1];
@@ -67,6 +78,8 @@ public class MyServer {
             }
         }
     }
+
+
 
     public synchronized void broadcastMsg(String msg) {
         for (ClientHandler o : clients) {
